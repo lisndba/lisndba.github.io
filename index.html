@@ -152,6 +152,86 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-samba" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/13/samba/">搭建Samba服务器</a>
+    </h1>
+  
+
+        
+        <a href="/2017/03/13/samba/" class="archive-article-date">
+  	<time datetime="2017-03-14T01:31:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-03-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="目录："><a href="#目录：" class="headerlink" title="目录："></a>目录：</h2><p>一、samba的安装<br>二、可以匿名用户登录<br>三、认证用户登录<br>四、用户帐号的映射<br>五、客户端访问控制<br>六、隐藏共享<br>七、问题集</p>
+<hr>
+<h3 id="一、samba的安装"><a href="#一、samba的安装" class="headerlink" title="一、samba的安装"></a>一、samba的安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">yum list|grep samba4</div><div class="line">yum install samba4* -y</div><div class="line">启动：</div><div class="line"> /etc/init.d/smb restart</div><div class="line"> /etc/init.d/nmb restart</div><div class="line">设置自动启动：</div><div class="line">chkconfig  smb on</div><div class="line">chkconfig  nmb on</div></pre></td></tr></table></figure>
+<h3 id="二、可以匿名用户登录"><a href="#二、可以匿名用户登录" class="headerlink" title="二、可以匿名用户登录"></a>二、可以匿名用户登录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"> vim /etc/samba/smb.conf</div><div class="line">[global]</div><div class="line">security = share</div><div class="line">[public]</div><div class="line">comment= public</div><div class="line">path = /public</div><div class="line">public = yes</div><div class="line">writable = yes</div><div class="line"></div><div class="line">mkdir public</div><div class="line">chmod 777 public</div><div class="line">/etc/init.d/smb restart</div><div class="line">/etc/init.d/nmb restart</div></pre></td></tr></table></figure>
+<p>测试：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">smbclient //10.10.54.81/public</div><div class="line"></div><div class="line">\\10.10.54.81\public          --window在计算机网络地址栏输入</div><div class="line"></div><div class="line">Ubuntu</div><div class="line">smb://10.10.54.81/public     --linux</div></pre></td></tr></table></figure></p>
+<h3 id="三、认证用户登录"><a href="#三、认证用户登录" class="headerlink" title="三、认证用户登录"></a>三、认证用户登录</h3><p>(1)创建samba用户<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"> groupadd public</div><div class="line"> useradd nan -g public     --创建系统用户</div><div class="line"> id nan               --查看用户信息</div><div class="line"> uid=509(nan) gid=509(public) groups=509(public)</div><div class="line"> pdbedit <span class="_">-a</span> -u nan     --创建samba用户</div><div class="line"> pdbedit -L          --查看创建的samba用户</div><div class="line"> nan:509:</div><div class="line"></div><div class="line">-u 用户名 <span class="_">-a</span> 创建</div></pre></td></tr></table></figure></p>
+<p>//修改密码<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">smbpasswd nan</div></pre></td></tr></table></figure></p>
+<p>//删除<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"> pdbedit -x lisn</div><div class="line">``` </div><div class="line"></div><div class="line">//查看samba进程链接</div><div class="line">``` bash</div><div class="line">smbstatus [-pS] [-u username]</div><div class="line"></div><div class="line"> smbstatus -u public</div></pre></td></tr></table></figure></p>
+<p>//测试配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"> testparm /etc/samba/smb.conf</div><div class="line">Load smb config files from /etc/samba/smb.conf</div><div class="line">rlimit_max: increasing rlimit_max (1024) to minimum Windows <span class="built_in">limit</span> (16384)</div><div class="line">Processing section <span class="string">"[public]"</span></div><div class="line">WARNING: The security=share option is deprecated</div><div class="line">Loaded services file OK.</div><div class="line">Server role: ROLE_STANDALONE</div><div class="line">Press enter to see a dump of your service definitions</div></pre></td></tr></table></figure></p>
+<p>(2)修改配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">vim /etc/samba/smb.conf</div><div class="line">[global]</div><div class="line">security = user</div><div class="line">config file=/etc/samba/smb.conf.%U</div><div class="line"></div><div class="line">[public]</div><div class="line">comment= public</div><div class="line">path = /public</div><div class="line">write list= public</div><div class="line">writable = yes</div><div class="line">browseable=yes          --设置显示共享文件夹,默认显示</div><div class="line"></div><div class="line"> chgrp public /public</div><div class="line">或者</div><div class="line">chown root.public /public</div><div class="line"></div><div class="line"> chmod 755 /public/</div><div class="line"></div><div class="line">重启：</div><div class="line"> /etc/init.d/smb restart</div><div class="line"> /etc/init.d/nmb restart</div><div class="line"></div><div class="line">测试:</div><div class="line">smbclient //10.10.54.81/public -U public</div></pre></td></tr></table></figure></p>
+<h3 id="四、用户帐号的映射"><a href="#四、用户帐号的映射" class="headerlink" title="四、用户帐号的映射"></a>四、用户帐号的映射</h3><p>帐号映射配置：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"> vim /etc/samba/smbusers</div><div class="line">nan = aa bb</div></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">配置文件:</div><div class="line"> vim /etc/samba/smb.conf</div><div class="line"></div><div class="line">[global]</div><div class="line">username map=/etc/samba/smbusers     --帐号映射</div><div class="line">[public]</div><div class="line">comment= public</div><div class="line">path = /public</div><div class="line">writable = yes</div><div class="line">browseable = yes</div></pre></td></tr></table></figure>
+<p>重启<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">/etc/init.d/smb restart</div><div class="line">/etc/init.d/nmb restart</div></pre></td></tr></table></figure></p>
+<p>测试：<br>使用帐号aa/bb登录</p>
+<h3 id="五、客户端访问控制"><a href="#五、客户端访问控制" class="headerlink" title="五、客户端访问控制"></a>五、客户端访问控制</h3><p>hosts allow:只允许配置的IP地址/端可以访问samba服务端<br>hosts deny:只拒绝配置的IP地址/端可以访问samba服务端</p>
+<p>[global]<br>security = user<br>hosts deny =10.10.54.80  –只禁止10.10.54.80访问<br>hosts allow =10.10.54.80 –只允许10.10.54.80访问<br>[public]<br>comment= public<br>path = /public<br>public = yes<br>write list=+nan,@public –允许nan用户，public组写入权限</p>
+<p>测试：<br>当hosts deny =10.10.54.80，10.10.54.80不能访问<br>当hosts allow =10.10.54.80，只有10.10.54.80能访问</p>
+<h3 id="六、隐藏共享"><a href="#六、隐藏共享" class="headerlink" title="六、隐藏共享"></a>六、隐藏共享</h3><p>需求：/security目录值可以boss用户浏览和登录，/pub目录只可以@yanfa,boss可以访问和浏览</p>
+<p>(1)创建用户<br> useradd boss<br> groupadd yanfa<br> useradd lsn -g yanfa<br> pdbedit -a -u boss</p>
+<p>(2)修改配置文件<br>需要针对boss用户单独创建配置文件smb.conf.boss<br> cp smb.conf smb.conf.boss<br> vim /etc/samba/smb.conf<br>[global]<br>security = user<br>config file = /etc/samba/smb.conf.%U<br>[public]<br>comment= yanfa access<br>path = /public<br>write list= @yanfa,boss</p>
+<p> vim /etc/samba/smb.conf.boss<br>[global]<br>security = user<br>[public]<br>comment= yanfa access<br>path = /public<br>write list= @yanfa,boss<br>[security]<br>comment = only boss access<br>path = /security<br>writable = yes</p>
+<p> /etc/init.d/nmb restart<br> /etc/init.d/smb restart</p>
+<p>测试：<br>smbclient -L 10.10.54.226 -U boss –boss用户<br>smbclient -L 10.10.54.226 -U wenl –研发组人</p>
+<p>挂载<br>mount -t cifs //10.10.54.81/softs /mnt/</p>
+<p>设置自动挂载：</p>
+<p>cat /etc/fstab<br>//192.168.27.233/public /mnt/data/ cifs defaults,username=XXXX,password=XXXX  0 0</p>
+<p>setsebool -P samba_export_all_rw on</p>
+<h3 id="六、问题集"><a href="#六、问题集" class="headerlink" title="六、问题集"></a>六、问题集</h3><p>1.不知道什么原因导致samba的nmb<br>nmb状态显示：<br>dead but pid file exists</p>
+<p>根据网上<br>!ps -efww|grep smbd|grep -v grep|cut -c 9-15|xargs kill<br>没用!!!!</p>
+<p>解决方法：<br>卸载samba更换为samba4<br>再重新配置，OK!!!</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/03/13/samba/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+  
     <article id="post-我来了" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
