@@ -3,13 +3,7 @@
   <entry>
     <title><![CDATA[test]]></title>
     <url>%2F2017%2F05%2F17%2Ftest%2F</url>
-    <content type="text"></content>
-      <categories>
-        <category>Hexo</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-      </tags>
+    <content type="text"><![CDATA[1 2 3 4 5 6 O O O O O O]]></content>
   </entry>
   <entry>
     <title><![CDATA[Hexo,搭建属于自己的博客]]></title>
